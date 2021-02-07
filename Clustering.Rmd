@@ -1,0 +1,121 @@
+---
+title: "Prediction Using Supervised ML"
+author: Article by Saikat Kar
+
+output: 
+  html_document:
+    toc : true
+    toc_float : true
+    theme: cerulean
+---
+
+What is Unsupervised Learning?
+
+Unsupervised learning is a branch of machine learning that is used to find underlying patterns in data and is often used in exploratory data analysis. Unsupervised learning does not use labeled data like supervised learning, but instead focuses on the data's features
+
+What is k means clustering?
+
+K-means clustering is a type of unsupervised learning, which is used when you have unlabeled data (i.e., data without defined categories or groups). The goal of this algorithm is to find groups in the data, with the number of groups represented by the variable K. Data points are clustered based on feature similarity.
+
+Importing necessary libraries
+```{r library,warning=FALSE,message=FALSE}
+library(gmodels)
+library(cluster)
+library(psych)
+```
+
+Overview of Iris dataset
+```{r}
+head(iris)
+dim(iris)
+str(iris)
+summary(iris)
+describe(iris)
+```
+
+No of missing values
+```{r}
+colSums(is.na(iris))
+```
+This proves that there is no missing values and no need of data cleaning.
+
+
+
+Clustering Iris dataset without species column
+```{r}
+data <- iris[,-5]
+class <- iris[,5]
+```
+
+Computing Within Sum of Squres for Cluster number 1 to 15
+```{r}
+wss <- 0
+for (i in 1:15) wss[i] <- kmeans(data,centers=i)$tot.withinss
+plot(1:15, wss, type="b",
+     xlab="Number of Clusters",
+     ylab="Within groups sum of squares",col="blue",pch=16,lwd=3)
+```
+
+There is inflection point or "elbow of the graph" at k = 3;
+some knowledge of the data (namely the number of species) also tells us 
+that it might be logical to look for three clusters in our data.
+
+taking clusters = 3
+```{r}
+results <- kmeans(data,centers=3)
+class(results)
+```
+
+Compairing clustering prediction with actual species in tabular form
+```{r}
+table(class)
+results$size
+results$cluster
+table(class,results$cluster)
+```
+
+Cross Tabular form
+```{r}
+CrossTable(class,results$cluster)
+```
+
+#Visualisation
+Compairing clustering prediction with actual species 
+In Petal.length and Petal.width
+```{r}
+par(mfrow=c(1,2))
+plot(data$Petal.Length,data$Petal.Width,col=results$cluster,pch=19,
+     xlab="Petal Length",ylab="Petal Width",main="By cluster")
+plot(data$Petal.Length,data$Petal.Width,col=class,pch=19,
+     xlab="Petal Length",ylab="Petal Width",main="By species")
+```
+
+In Sepal.Length and Sepal.Width
+```{r}
+par(mfrow=c(1,2))
+plot(data$Sepal.Length, data$Sepal.Width,col=results$cluster,pch=19,
+     xlab="Sepal Length",ylab="Sepal Width",main="By cluster")
+plot(data$Sepal.Length, data$Sepal.Width,col=class,pch=19,
+     xlab="Sepal Length",ylab="Sepal Width",main="By Species")
+```
+
+By Principal Component Analysis
+```{r}
+p <- princomp(data)
+par(mfrow=c(1,2))
+plot(p$scores[,1],p$scores[,2],col=results$cluster,
+     pch=16,
+     xlab="Principal Component 1",
+     ylab="Principal Component 2",
+     main="By cluster")
+plot(p$scores[,1],p$scores[,2],col=class,
+     pch=16,
+     xlab="Principal Component 1",
+     ylab="Principal Component 2",
+     main="By species")
+```
+
+Finally,We can comment that if we divide the data into 3 clusters then it will greatly reduce within sum of squares and thus explined part will increase. So, cluster=3 is appropriate.
+
+Thank You!!
+
